@@ -63,7 +63,7 @@ class Hooks
 
   def read_data(hook_id)
 
-    hook_folder_files(hook_id).map { |file| File.read(file).strip }.to_s
+    "[" + hook_folder_files(hook_id).map { |file| File.read(file).strip }.join(",") + "]"
 
   end
 

@@ -1,1 +1,6 @@
 hooks
+**/*.log
+**/*.rvm
+**/*.DS_Store
+**/*.idea
+
