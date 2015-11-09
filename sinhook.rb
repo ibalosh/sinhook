@@ -38,7 +38,7 @@ class SinHook < Sinatra::Base
 
     else
 
-      halt "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
 
     end
 
@@ -53,7 +53,7 @@ class SinHook < Sinatra::Base
 
     else
 
-      "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
 
     end
 
@@ -68,7 +68,7 @@ class SinHook < Sinatra::Base
 
     else
 
-      halt "{\"Error\":\"End point for provided hook id doesn't exists.\""
+      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
 
     end
 
@@ -83,7 +83,7 @@ class SinHook < Sinatra::Base
 
   not_found do
 
-    "{\"Error\":\"End point not found.\"}"
+    halt 404, "{\"Error\":\"End point not found.\"}"
 
   end
 
