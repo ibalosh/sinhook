@@ -1,36 +1,44 @@
 # SinHook
 
-SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which will collect JSON based requests made to it. 
-You can easily run it locally to inspect and debug webhook requests, without worrying that your webhook requests will end up online.
+SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing. 
+SinHook will collect JSON based requests and allow debugging them. 
+
+You can easily run the SinHook app locally to inspect and debug webhook requests, without worrying that your webhook requests will end up online.
 
 ## Using the app
 
-All you need to do is start up the Sinatra app by executing command
+To use the SinHook application, all you need to do is start up the Sinatra app by executing the following command:
 
 ``` ruby
 ruby sinhook
 ```
   
-Sinatra webapp should be online on your `localhost:8888` address.  
+Sinatra webapp should be online on your machine at following web address: `localhost:8888`.  
 Now that the Sinatra webapp is online, it is ready to be used. 
 
 You can try it out by generating couple of webhook endpoints and send requests to them.
 
-## Creating web hook requests endpoint
+## Webhook endpoints
+
+### Creating endpoint
 
 To create a new webhook request endpoint, visit `http://localhost:8888/hook/generate` URL in your browser. 
-Webhook request endpoint is created, and you will see a hook id for the new endpoint on the page.
+Webhook request endpoint will be created, and you will see a hook id for the new endpoint on the page.
 
-## Sending requests to webhook endpoint
+This way you have created a unique dedicated endpoint you could use for testing webhooks. You can generate any number of endpoints.
 
-To send requests to newly created endpoint, send data to `http://localhost:8888/hook/:hook_id` URL. 
+### Sending requests to the endpoint
+
+To send a request to an endpoint, send data to `http://localhost:8888/hook/:hook_id` URL. 
 Doing this with CURL would look something like this:
 
 ``` curl
 CURL -X POST http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8 -d "{'Hello World.'}"
 ``` 
 
-## Viewing the requests on webhook endpoint  
+`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+
+### Viewing requests on the endpoint  
 
 To view webhook requests you sent to an endpoint, all you need to do is visit the webhook endpoint URL, or initiate a GET request.
 
@@ -40,10 +48,22 @@ Webhook URL would look something like:
 http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
 ```
 
-In the URL, after `/hook/` the hook_id is placed. 
+`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
 
 When visiting the page, you will see the top last 20 webhooks requests. Older requests are not sored.
 
+## HTTP status codes endpoints
+
+Sometimes you need to test whether your webapp responds correctly to certain http statuses of webhook endpoints.
+In order to test that you could use SinHook app endpoints which return certain http statuses, depending on which one you request.
+
+To try this option out, initiate a GET request like the following:
+
+``` curl
+CURL -X GET http://localhost:8888/hook/http_status/404"
+``` 
+
+This request will return a response with 404 status code. 
 
 ## Notes
 
