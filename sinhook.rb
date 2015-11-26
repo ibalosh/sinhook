@@ -1,5 +1,6 @@
 require_relative 'hooks.rb'
 require "sinatra"
+require "pry"
 
 class SinHook < Sinatra::Base
 
@@ -54,6 +55,23 @@ class SinHook < Sinatra::Base
     else
 
       halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+
+    end
+
+  end
+
+  # get hook data
+  get "/hook/http_status/:number" do
+
+    http_code = params[:number].to_i
+
+    if http_code > 200 and http_code < 600
+
+      halt http_code, "{\"Success\":\"Returned status: #{http_code}.\"}"
+
+    else
+
+      halt 404
 
     end
 
