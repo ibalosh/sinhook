@@ -16,18 +16,15 @@ class SinHook < Sinatra::Base
 
   end
 
-  # generate id for the webhook
-  get "/hook/generate", :provides => :json do
+  [ :get, :post ].each do |method|
 
-    hook_id = settings.hooks.create
-    "{\"hook_id\": \"#{hook_id}\"}"
+    # generate id for the webhook
+    send method, "/hook/generate", :provides => :json do
 
-  end
+      hook_id = settings.hooks.create
+      "{\"hook_id\": \"#{hook_id}\"}"
 
-  post "/hook/generate", :provides => :json do
-
-    hook_id = settings.hooks.create
-    "{\"hook_id\": \"#{hook_id}\"}"
+    end
 
   end
 
@@ -46,12 +43,12 @@ class SinHook < Sinatra::Base
 
   end
 
-  # break existing webhook, will return status code :number
-  post "/hook/:hook_id/break/:number" do
+  # break existing webhook, will return status code :status_code
+  post "/hook/:hook_id/break/:status_code" do
 
     if settings.hooks.is_available?(params[:hook_id])
 
-      settings.broken_hooks.add(params[:hook_id],params[:number].to_i)
+      settings.broken_hooks.add(params[:hook_id],params[:status_code].to_i)
 
     end
 
@@ -94,9 +91,9 @@ class SinHook < Sinatra::Base
   end
 
   # get hook data
-  get "/hook/http_status/:number" do
+  get "/hook/http_status/:status_code" do
 
-    http_code = params[:number].to_i
+    http_code = params[:status_code].to_i
 
     if http_code > 200 and http_code < 600
 
