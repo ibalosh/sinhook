@@ -12,7 +12,7 @@ class SinHook < Sinatra::Base
     set :environment, :production
 
     set :hooks, Hooks.new(settings.hooks_to_store_count)
-    set :broken_hooks, BrokenHooks.new
+    set :broken_hooks, Hooks::Broken.new
 
   end
 
@@ -44,7 +44,7 @@ class SinHook < Sinatra::Base
   end
 
   # break existing webhook, will return status code :status_code
-  post "/hook/:hook_id/break/:status_code" do
+  put "/hook/:hook_id/break/:status_code" do
 
     if settings.hooks.is_available?(params[:hook_id])
 
@@ -55,7 +55,7 @@ class SinHook < Sinatra::Base
   end
 
   # fix broken error hook, will return status code 200 from now on
-  post "/hook/:hook_id/fix" do
+  put "/hook/:hook_id/fix" do
 
     if settings.hooks.is_available?(params[:hook_id])
 
