@@ -1,6 +1,40 @@
 # encoding: utf-8
 require_relative 'hook_storage/folder'
 
+class BrokenHooks
+
+  def initialize
+
+    @hooks = {}
+
+  end
+
+  def add(hook_id, status_code)
+
+    @hooks[hook_id] = status_code.to_i
+
+  end
+
+  def delete(hook_id)
+
+    @hooks.delete hook_id
+
+  end
+
+  def status(hook_id)
+
+    @hooks[hook_id]
+
+  end
+
+  def is_available?(hook_id)
+
+    !@hooks[hook_id].nil?
+
+  end
+
+end
+
 class Hooks
 
   attr_accessor :hooks_to_store_count
