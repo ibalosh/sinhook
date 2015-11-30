@@ -52,6 +52,24 @@ http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
 
 When visiting the page, you will see the top last 20 webhooks requests. Older requests are not sored.
 
+### Breaking hook endpoint with specific status code
+
+Sometimes, you need to create a hook endpoint which will work correctly and return status code 200, but then later on you want to break
+it to return status code 500 to test behaviour when endpoint breaks. In order to do that all you need to to is do a CURL command like this:
+
+``` curl
+CURL -X PUT http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/break/500"
+``` 
+
+* `8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+* `500` would be the status code it will return from now on
+
+To fix the endpoint, you need to use the following command:
+
+``` curl
+CURL -X PUT http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/fix"
+``` 
+
 ## HTTP status codes endpoints
 
 Sometimes you need to test whether your webapp responds correctly to certain http statuses of webhook endpoints.
