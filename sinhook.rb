@@ -114,22 +114,27 @@ class SinHook < Sinatra::Base
 
   end
 
-  # get hook data
-  get "/hook/http_status/:status_code" do
+  [:get, :post].each do |method|
 
-    http_code = params[:status_code].to_i
+    # get hook data
+    send method, "/hook/http_status/:status_code" do
 
-    if http_code > 200 and http_code < 600
+      http_code = params[:status_code].to_i
 
-      halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
+      if http_code > 200 and http_code < 600
 
-    else
+        halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
 
-      halt 404
+      else
+
+        halt 404
+
+      end
 
     end
 
   end
+
 
   # clear hook url data
   delete "/hook/:hook_id" do
