@@ -37,13 +37,14 @@ class SinHook < Sinatra::Base
 
     else
 
-      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+      halt 404
 
     end
 
   end
 
-  # break existing webhook, will return status code :status_code
+  # break existing webhook,
+  # webhook will return status code :status_code
   put "/hook/:hook_id/break/:status_code" do
 
     if settings.hooks.is_available?(params[:hook_id])
@@ -54,7 +55,8 @@ class SinHook < Sinatra::Base
 
   end
 
-  # fix broken error hook, will return status code 200 from now on
+  # fix broken error webhook,
+  # webhook will return status code 200 from now on
   put "/hook/:hook_id/fix" do
 
     if settings.hooks.is_available?(params[:hook_id])
@@ -84,7 +86,7 @@ class SinHook < Sinatra::Base
 
     else
 
-      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+      halt 404
 
     end
 
