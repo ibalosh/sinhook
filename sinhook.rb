@@ -4,6 +4,27 @@ require "pry"
 
 class SinHook < Sinatra::Base
 
+  class Response
+
+    def initialize
+
+    end
+
+    def message(type, message)
+
+      "{\"Response\": \"#{STATUS[type]}\",\"Message\": \"#{message}\"}"
+
+    end
+
+    private
+
+    STATUS = {
+        :success => 'Success',
+        :error => 'Error'
+    }
+
+  end
+
   configure do
 
     set :bind, '0.0.0.0'
@@ -13,16 +34,17 @@ class SinHook < Sinatra::Base
 
     set :hooks, Hooks.new(settings.hooks_to_store_count)
     set :broken_hooks, Hooks::Broken.new
+    set :response, Response.new
 
   end
 
-  [ :get, :post ].each do |method|
+  [:get, :post].each do |method|
 
-    # generate id for the webhook
+    # generate id for the web hook
     send method, "/hook/generate", :provides => :json do
 
       hook_id = settings.hooks.create
-      "{\"hook_id\": \"#{hook_id}\"}"
+      settings.response.message(:success, "Hook ID: #{hook_id}")
 
     end
 
@@ -43,20 +65,20 @@ class SinHook < Sinatra::Base
 
   end
 
-  # break existing webhook,
-  # webhook will return status code :status_code
+  # break existing web hook,
+  # web hook will return status code :status_code
   put "/hook/:hook_id/break/:status_code" do
 
     if settings.hooks.is_available?(params[:hook_id])
 
-      settings.broken_hooks.add(params[:hook_id],params[:status_code].to_i)
+      settings.broken_hooks.add(params[:hook_id], params[:status_code].to_i)
 
     end
 
   end
 
-  # fix broken error webhook,
-  # webhook will return status code 200 from now on
+  # fix broken error web hook,
+  # web hook will return status code 200 from now on
   put "/hook/:hook_id/fix" do
 
     if settings.hooks.is_available?(params[:hook_id])
@@ -99,7 +121,7 @@ class SinHook < Sinatra::Base
 
     if http_code > 200 and http_code < 600
 
-      halt http_code, "{\"Success\":\"Returned status: #{http_code}.\"}"
+      halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
 
     else
 
@@ -114,11 +136,11 @@ class SinHook < Sinatra::Base
 
     if settings.hooks.is_available?(params[:hook_id]) && settings.hooks.delete(params[:hook_id])
 
-      "{\"Success\":\"End point deleted.\""
+      settings.response.message(:success, "Endpoint #{params[:hook_id]} deleted.")
 
     else
 
-      halt 404, "{\"Error\":\"End point for provided hook id doesn't exists.\"}"
+      halt 404
 
     end
 
@@ -127,19 +149,19 @@ class SinHook < Sinatra::Base
   get "/hook/:hook_id/clear", :provides => :json do
 
     settings.hooks.clear_data(params[:hook_id])
-    "{\"Success\":\"List of hooks cleared.\""
+    settings.response.message(:success, "List of hooks cleared.")
 
   end
 
   not_found do
 
-    halt 404, "{\"Error\":\"End point not found.\"}"
+    halt 404, settings.response.message(:error, "End point not found.")
 
   end
 
   error do
 
-    "{\"Error\":\"Ooops, sorry there was a nasty error - #{env['sinatra.error'].name}\"}"
+    settings.response.message(:error, "Ooops, sorry there was a nasty error - #{env['sinatra.error'].name}")
 
   end
 
