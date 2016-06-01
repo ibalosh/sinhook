@@ -35,6 +35,7 @@ class SinHook < Sinatra::Base
     set :hooks, Hooks.new(settings.hooks_to_store_count)
     set :broken_hooks, Hooks::Broken.new
     set :response, Response.new
+    set :maximum_hook_delay, 3600
 
   end
 
@@ -114,7 +115,21 @@ class SinHook < Sinatra::Base
 
   end
 
-  [:get, :post].each do |method|
+  [:get, :post, :put].each do |method|
+
+    send method, "/hook/delayed/:seconds" do
+
+      seconds = params[:seconds].to_i
+      seconds = (seconds > 0 && seconds < settings.maximum_hook_delay)? seconds : 0
+
+      sleep seconds
+      settings.response.message(:success, "Returned status: 200. Delayed response for #{seconds}")
+
+    end
+
+  end
+
+  [:get, :post, :put].each do |method|
 
     # get hook data
     send method, "/hook/http_status/:status_code" do
