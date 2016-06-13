@@ -97,6 +97,15 @@ class SinHook < Sinatra::Base
 
   end
 
+  # clear all data from an existing hook
+  get "/hook/:hook_id/clear", :provides => :json do
+
+    hook_exists?(params[:hook_id])
+    settings.hooks.clear_data(params[:hook_id])
+    settings.response.message(:success, "List of hooks cleared.")
+
+  end
+
   # break existing web hook,
   # web hook will return status code :status_code
   put "/hook/:hook_id/break/:status_code" do
@@ -137,13 +146,6 @@ class SinHook < Sinatra::Base
       halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
 
     end
-
-  end
-
-  get "/hook/:hook_id/clear", :provides => :json do
-
-    settings.hooks.clear_data(params[:hook_id])
-    settings.response.message(:success, "List of hooks cleared.")
 
   end
 
