@@ -3,46 +3,15 @@ require_relative 'hook_storage/folder'
 
 class Hooks
 
-  class Broken
+  def initialize(hooks_to_store_count)
 
-    def initialize
-
-      @hooks = {}
-
-    end
-
-    def add(hook_id, status_code)
-
-      @hooks[hook_id] = status_code.to_i
-
-    end
-
-    def delete(hook_id)
-
-      @hooks.delete hook_id
-
-    end
-
-    def status(hook_id)
-
-      @hooks[hook_id]
-
-    end
-
-    def is_available?(hook_id)
-
-      !@hooks[hook_id].nil?
-
-    end
+    @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks",hooks_to_store_count)
 
   end
 
-  attr_accessor :hooks_to_store_count
+  def hooks_to_store_count
 
-  def initialize(hooks_to_store_count)
-
-    @hooks_to_store_count = hooks_to_store_count
-    @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks",hooks_to_store_count)
+    @hook_storage.hooks_to_store_count
 
   end
 

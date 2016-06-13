@@ -6,10 +6,6 @@ class SinHook < Sinatra::Base
 
   class Response
 
-    def initialize
-
-    end
-
     def message(type, message)
 
       "{\"Response\": \"#{STATUS[type]}\",\"Message\": \"#{message}\"}"
@@ -33,15 +29,31 @@ class SinHook < Sinatra::Base
     set :environment, :production
 
     set :hooks, Hooks.new(settings.hooks_to_store_count)
-    set :broken_hooks, Hooks::Broken.new
     set :response, Response.new
     set :maximum_hook_delay, 3600
 
   end
 
+  helpers do
+
+    def hook_exists?(hook_id)
+
+      halt 404 unless settings.hooks.is_available?(hook_id)
+
+    end
+
+    def http_code?(number)
+
+      halt 404 unless number > 200 and number < 600
+
+    end
+
+  end
+
+  # generate id for the web hook, allow using GET method too,
+  # so that call can be done through browser, for quick access
   [:get, :post].each do |method|
 
-    # generate id for the web hook
     send method, "/hook/generate", :provides => :json do
 
       hook_id = settings.hooks.create
@@ -51,18 +63,37 @@ class SinHook < Sinatra::Base
 
   end
 
-  # accept data on specific hook catch url
-  post "/hook/:hook_id" do
+  # delete existing hook and all its data
+  delete "/hook/:hook_id" do
 
-    if settings.hooks.is_available?(params[:hook_id])
+    hook_id = params[:hook_id]
+    hook_exists?(hook_id)
 
-      settings.hooks.set_data(params[:hook_id], request.env["rack.input"].read)
+    if settings.hooks.delete(hook_id)
+
+      settings.response.message(:success, "Endpoint #{params[:hook_id]} deleted.")
 
     else
 
-      halt 404
+      settings.response.message(:error, "Could not delete hook with id: #{params[:hook_id]}.")
 
     end
+
+  end
+
+  # accept data on specific hook catch url
+  post "/hook/:hook_id" do
+
+    hook_exists?(params[:hook_id])
+    settings.hooks.set_data(params[:hook_id], request.env["rack.input"].read)
+
+  end
+
+  get "/hook/:hook_id", :provides => :json do
+
+    hook_id = params[:hook_id]
+    hook_exists?(hook_id)
+    settings.hooks.read_data(hook_id)
 
   end
 
@@ -70,11 +101,7 @@ class SinHook < Sinatra::Base
   # web hook will return status code :status_code
   put "/hook/:hook_id/break/:status_code" do
 
-    if settings.hooks.is_available?(params[:hook_id])
-
-      settings.broken_hooks.add(params[:hook_id], params[:status_code].to_i)
-
-    end
+    #if settings.hooks.is_available?(params[:hook_id])
 
   end
 
@@ -82,36 +109,7 @@ class SinHook < Sinatra::Base
   # web hook will return status code 200 from now on
   put "/hook/:hook_id/fix" do
 
-    if settings.hooks.is_available?(params[:hook_id])
-
-      settings.broken_hooks.delete(params[:hook_id])
-
-    end
-
-  end
-
-  # get hook data
-  get "/hook/:hook_id", :provides => :json do
-
-    hook_id = params[:hook_id]
-
-    if settings.hooks.is_available?(hook_id)
-
-      if settings.broken_hooks.is_available?(hook_id)
-
-        halt settings.broken_hooks.status(hook_id)
-
-      else
-
-        settings.hooks.read_data(hook_id)
-
-      end
-
-    else
-
-      halt 404
-
-    end
+    #if settings.hooks.is_available?(params[:hook_id])
 
   end
 
@@ -132,35 +130,11 @@ class SinHook < Sinatra::Base
   [:get, :post, :put].each do |method|
 
     # get hook data
-    send method, "/hook/http_status/:status_code" do
+    send method, "/hook/status/:status_code" do
 
       http_code = params[:status_code].to_i
-
-      if http_code > 200 and http_code < 600
-
-        halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
-
-      else
-
-        halt 404
-
-      end
-
-    end
-
-  end
-
-
-  # clear hook url data
-  delete "/hook/:hook_id" do
-
-    if settings.hooks.is_available?(params[:hook_id]) && settings.hooks.delete(params[:hook_id])
-
-      settings.response.message(:success, "Endpoint #{params[:hook_id]} deleted.")
-
-    else
-
-      halt 404
+      http_code?(http_code)
+      halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
 
     end
 
