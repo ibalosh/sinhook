@@ -21,82 +21,6 @@ class SinHook < Sinatra::Base
 
   end
 
-  class Actions
-
-    attr_reader :hook_id
-
-    def initialize
-
-      @actions = {}
-
-    end
-
-    def add(action, hook_id)
-
-      @actions[hook_id] = [] if @actions[hook_id].nil?
-      @actions[hook_id] << action
-
-    end
-
-    def delete(action, hook_id)
-
-      return if @actions[hook_id].nil?
-      @actions[hook_id].delete action
-
-    end
-
-    def clear(hook_id)
-
-      @actions[hook_id] = nil
-
-    end
-
-    def execute(hook_id)
-
-      return if @actions[hook_id].nil?
-      @actions[hook_id].each { |action| action.execute }
-
-    end
-
-  end
-
-  class Action
-
-
-  end
-
-  class Delay < Action
-
-    def initialize(seconds)
-
-      @seconds = seconds
-
-    end
-
-    def execute
-
-      sleep @seconds
-
-    end
-
-  end
-
-  class Error < Action
-
-    def initialize(status_code)
-
-      @status_code = status_code
-
-    end
-
-    def execute
-
-      halt @status_code
-
-    end
-
-  end
-
   configure do
 
     set :bind, '0.0.0.0'
@@ -104,10 +28,8 @@ class SinHook < Sinatra::Base
     set :port, 8888
     set :environment, :production
 
-    set :hooks, Hooks.new(settings.hooks_to_store_count)
+    set :hooks, Hooks::DataProxy.new(settings.hooks_to_store_count)
     set :response, Response.new
-    set :hook_actions, Actions.new
-    set :maximum_hook_delay, 3600
 
   end
 
@@ -148,11 +70,11 @@ class SinHook < Sinatra::Base
 
     if settings.hooks.delete(hook_id)
 
-      settings.response.message(:success, "Endpoint #{params[:hook_id]} deleted.")
+      settings.response.message(:success, "Endpoint #{hook_id} deleted.")
 
     else
 
-      settings.response.message(:error, "Could not delete hook with id: #{params[:hook_id]}.")
+      settings.response.message(:error, "Could not delete hook with id: #{hook_id}.")
 
     end
 
@@ -163,6 +85,8 @@ class SinHook < Sinatra::Base
 
     hook_exists?(params[:hook_id])
     settings.hooks.set_data(params[:hook_id], request.env["rack.input"].read)
+    settings.hook_actions.execute(hook_id)
+    settings.hooks.read_data(hook_id)
 
   end
 
@@ -170,7 +94,6 @@ class SinHook < Sinatra::Base
 
     hook_id = params[:hook_id]
     hook_exists?(hook_id)
-    settings.hook_actions.execute(hook_id)
     settings.hooks.read_data(hook_id)
 
   end
@@ -186,24 +109,24 @@ class SinHook < Sinatra::Base
 
   # break existing web hook,
   # web hook will return status code :status_code
-  put "/hook/:hook_id/break/:status_code" do
+  put "/hook/:hook_id/status/:status_code" do
 
     hook_id = params[:hook_id]
+    status_code = params[:status_code].to_i
     hook_exists?(hook_id)
-    settings.hook_actions.add(Error.new(params[:status_code]), hook_id)
-    settings.response.message(:success, "Status code [#{params[:status_code]}] set.")
+
+    settings.hooks.responses.add_status(status_code, hook_id)
+    settings.response.message(:success, "Status code [#{status_code}] set.")
 
   end
 
-  put "/hook/:hook_id/delayed/:seconds" do
+  put "/hook/:hook_id/delay/:seconds" do
 
     hook_id = params[:hook_id]
+    seconds = params[:seconds].to_i
     hook_exists?(hook_id)
 
-    seconds = params[:seconds].to_i
-    seconds = (seconds > 0 && seconds < settings.maximum_hook_delay)? seconds : 0
-
-    settings.hook_actions.add(Delay.new(seconds), hook_id)
+    settings.hooks.responses.add_delay(seconds, hook_id)
     settings.response.message(:success, "Delayed response for #{seconds} seconds.")
 
   end
@@ -212,15 +135,14 @@ class SinHook < Sinatra::Base
   # web hook will return status code 200 from now on
   put "/hook/:hook_id/fix" do
 
-    hook_id = params[:hook_id]
-    hook_exists?(hook_id)
-    settings.hook_actions.clear(hook_id)
+    hook_exists?(params[:hook_id])
+    settings.hook_actions.clear(params[:hook_id])
 
   end
 
   [:get, :post, :put].each do |method|
 
-    send method, "/hook/delayed/:seconds" do
+    send method, "/hook/delay/:seconds" do
 
       seconds = params[:seconds].to_i
       seconds = (seconds > 0 && seconds < settings.maximum_hook_delay)? seconds : 0
@@ -239,7 +161,8 @@ class SinHook < Sinatra::Base
 
       http_code = params[:status_code].to_i
       http_code?(http_code)
-      halt http_code, settings.response.message(:success, "Returned status: #{http_code}.")
+      status http_code
+      settings.response.message(:success, "Returned status: #{http_code}.")
 
     end
 
