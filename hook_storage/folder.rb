@@ -3,6 +3,7 @@ require_relative 'base'
 
 module HookStorage
 
+  # storing web hooks to files and hook managing
   class Folder < Storage
 
 

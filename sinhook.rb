@@ -4,6 +4,7 @@ require "pry"
 
 class SinHook < Sinatra::Base
 
+  # configuration settings for the app.
   configure do
 
     set :bind, '0.0.0.0'
@@ -16,61 +17,61 @@ class SinHook < Sinatra::Base
 
   end
 
-  helpers do
+  # helpers which allow easy management of web hooks
+  module HookResponse
 
-    STATUS = {
-        :success => 'Success',
-        :error => 'Error'
-    }
+      RESPONSE_TYPES = [ :status, :delay, :message ]
+      MESSAGE_TYPE = { :success => 'Success', :error => 'Error' }
+      MAXIMUM_SECONDS_DELAY = 3600
 
-    MAXIMUM_SECONDS_DELAY = 3600
+      def hook_exists?(hook_id)
 
-    def response_message(type, message)
+        halt 404 unless settings.hooks.is_available?(hook_id)
 
-      "{\"Response\": \"#{STATUS[type]}\",\"Message\": \"#{message}\"}"
+      end
 
-    end
+      def valid_http_code?(number)
 
-    def hook_exists?(hook_id)
+        number >= 200 and number <= 600
 
-      halt 404 unless settings.hooks.is_available?(hook_id)
+      end
 
-    end
+      def seconds_delay(seconds)
 
-    def http_code?(number)
+        (seconds > 0 && seconds < MAXIMUM_SECONDS_DELAY)? seconds : 0
 
-      number > 200 and number < 600
+      end
 
-    end
+      def response_message(type, message)
 
-    def seconds_delay(seconds)
+        "{\"Response\": \"#{MESSAGE_TYPE[type]}\",\"Message\": \"#{message}\"}"
 
-      (seconds > 0 && seconds < MAXIMUM_SECONDS_DELAY)? seconds : 0
+      end
 
-    end
+      def response_status(value)
 
-    def response_status(value)
+        valid_http_code?(value)? status(value) : status(500)
 
-      http_code?(value)? status(value) : status(500)
+      end
 
-    end
+      def response_delay(value)
 
-    def response_delay(value)
+        sleep value
 
-      sleep value
+      end
 
-    end
+      def execute_responses(hook_id)
 
-    def get_responses(hook_id)
+        settings.hooks_responses.get(hook_id).each { |key,value| send("response_#{key.to_s}",value) }
 
-      settings.hooks_responses.get(hook_id).each { |key,value| send("response_#{key.to_s}",value) }
-
-    end
+      end
 
   end
 
-  # generate id for the web hook, allow using GET method too,
-  # so that call can be done through browser, for quick access
+  helpers HookResponse
+
+  # generate new web hook endpoint - with id for the web hook, allow using GET method too,
+  # so that the call can be done through browser too by quick IP/hook/generate URL visit.
   [:get, :post].each do |method|
 
     send method, "/hook/generate", :provides => :json do
@@ -94,7 +95,7 @@ class SinHook < Sinatra::Base
 
     else
 
-      status 500
+      response_status(500)
       response_message(:error, "Could not delete hook with id: #{hook_id}.")
 
     end
@@ -105,6 +106,7 @@ class SinHook < Sinatra::Base
   post "/hook/:hook_id" do
 
     hook_exists?(params[:hook_id])
+    execute_responses(hook_id)
     settings.hooks.set_data(params[:hook_id], request.env["rack.input"].read)
     settings.hooks.read_data(params[:hook_id])
 
@@ -114,7 +116,7 @@ class SinHook < Sinatra::Base
 
     hook_id = params[:hook_id]
     hook_exists?(params[:hook_id])
-    get_responses(hook_id)
+    execute_responses(hook_id)
     settings.hooks.read_data(params[:hook_id])
 
   end
@@ -132,8 +134,8 @@ class SinHook < Sinatra::Base
 
   end
 
-  # break existing web hook,
-  # web hook will return status code :status_code
+  # update existing web hook, so that web hook will return status code :status_code for
+  # post/get /hook/:hook_id endpoints
   put "/hook/:hook_id/status/:status_code" do
 
     hook_id = params[:hook_id]
@@ -145,6 +147,8 @@ class SinHook < Sinatra::Base
 
   end
 
+  # update existing web hook, so that web hook will return :seconds delayed response for
+  # post/get /hook/:hook_id endpoints
   put "/hook/:hook_id/delay/:seconds" do
 
     hook_id = params[:hook_id]
@@ -156,15 +160,16 @@ class SinHook < Sinatra::Base
 
   end
 
-  # fix broken error web hook,
-  # web hook will return status code 200 from now on
-  put "/hook/:hook_id/fix" do
+  # clear all web hook response update added, for
+  # post/get /hook/:hook_id endpoints with PUT methods above
+  put "/hook/:hook_id/clear_responses" do
 
     hook_exists?(params[:hook_id])
-    settings.hook_actions.clear(params[:hook_id])
+    settings.hooks_responses.clear(params[:hook_id])
 
   end
 
+  # simple web hook endpoint with sole purpose to return response after :seconds seconds
   [:get, :post, :put].each do |method|
 
     send method, "/hook/delay/:seconds" do
@@ -177,6 +182,7 @@ class SinHook < Sinatra::Base
 
   end
 
+  # simple web hook endpoint with sole purpose to return response with :status_code status
   [:get, :post, :put].each do |method|
 
     # get hook data

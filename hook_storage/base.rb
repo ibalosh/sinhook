@@ -2,7 +2,7 @@ require "guid"
 
 module HookStorage
 
-  # interface for hook storage
+  # interface for storing web hooks
   class Storage
 
     attr_accessor :hooks_to_store_count

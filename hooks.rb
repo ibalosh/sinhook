@@ -4,9 +4,10 @@ require "sinatra"
 
 module Hooks
 
+  # Responses class represents a holder which will hold all responses tied to hooks, while server is up and running
+  # It's main function is to hold response types in hash form like: [HOOK_ID][STATUS_TYPE][VALUE]
+  # These responses types are picked up by sinatra app and handled
   class Responses
-
-    TYPES = [:status, :delay]
 
     def initialize
 
@@ -41,6 +42,9 @@ module Hooks
 
   end
 
+  # Delegation class for different web hook data holders.
+  # Currently only one type of web hook data holders is available - Folder storage - which holds all data
+  # for web hooks locally, in folders and files.
   class Data
 
     def initialize(hooks_to_store_count)
