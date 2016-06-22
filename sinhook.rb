@@ -105,19 +105,20 @@ class SinHook < Sinatra::Base
   # accept data on specific hook catch url
   post "/hook/:hook_id" do
 
-    hook_exists?(params[:hook_id])
+    hook_id = params[:hook_id]
+    hook_exists?(hook_id)
     execute_responses(hook_id)
-    settings.hooks.set_data(params[:hook_id], request.env["rack.input"].read)
-    settings.hooks.read_data(params[:hook_id])
+    settings.hooks.set_data(hook_id, request.env["rack.input"].read)
+    settings.hooks.read_data(hook_id)
 
   end
 
   get "/hook/:hook_id", :provides => :json do
 
     hook_id = params[:hook_id]
-    hook_exists?(params[:hook_id])
+    hook_exists?(hook_id)
     execute_responses(hook_id)
-    settings.hooks.read_data(params[:hook_id])
+    settings.hooks.read_data(hook_id)
 
   end
 
