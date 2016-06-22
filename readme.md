@@ -30,6 +30,18 @@ Web hook request endpoint will be created, and you will see a hook id for the ne
 
 This way you have created a unique dedicated endpoint you could use for testing web hooks. You can generate any number of endpoints.
 
+### Deleting endpoint
+
+To delete new web hook request endpoint, execute following request with tool like CURL.
+
+``` curl
+CURL -X DELETE http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
+``` 
+
+`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+ 
+Web hook request endpoint will be deleted.
+
 ### Sending requests to the endpoint
 
 To send a request to an endpoint, send data to `http://localhost:8888/hook/:hook_id` URL. 
@@ -61,6 +73,19 @@ You can view the web hook endpoint responses also by doing a call like:
 ``` curl
 CURL -X GET http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8
 ```
+
+### Clear request responses on the endpoint  
+
+When testing, you might have generated bunch of data on your web hook request endpoint. You might want to clear all data on your web hook endpoint.
+In order to do that execute the following request.
+
+``` curl
+CURL -X GET http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/clear"
+``` 
+
+`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+
+You could do this with visiting the URL too by browser. Once you execute the command, response on that endpoint will be empty.
 
 ## HTTP status codes endpoints
 
