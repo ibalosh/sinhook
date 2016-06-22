@@ -4,86 +4,38 @@ require "sinatra"
 
 module Hooks
 
-  module Response
+  class Responses
 
-    class Composite
+    TYPES = [:status, :delay]
 
-      def initialize(sinatra)
+    def initialize
 
-        @sinatra = sinatra
-        @responses = {}
-        
-      end
-
-      def add_delay(seconds, hook_id)
-
-        clear(hook_id) if @responses[hook_id].nil?
-        @responses[hook_id] << Hooks::Response::Delay.new(seconds)
-
-      end
-
-      def add_status(status, hook_id)
-
-        clear(hook_id) if @responses[hook_id].nil?
-        @responses[hook_id] << Hooks::Response::Status.new(status)
-
-      end
-
-      def clear(hook_id)
-
-        @responses[hook_id] = []
-
-      end
-
-      def execute(hook_id)
-
-        return if @responses[hook_id].nil?
-        @responses[hook_id].each { |response| response.execute(@sinatra) }
-
-      end
+      @responses = {}
 
     end
 
-    class BaseResponse ; end
+    def add(hook_id, type, value)
 
-    class Delay < BaseResponse
-
-      def initialize(seconds)
-
-        @maximum_delay_seconds = 3600
-        @seconds = calculate_delay(seconds)
-
-      end
-
-      def execute(sinatra)
-
-        sleep @seconds
-
-      end
-
-      private
-
-      def calculate_delay(seconds)
-
-        (seconds > 0 && seconds < @maximum_delay_seconds)? seconds : 0
-
-      end
+      clear(hook_id) unless hook_responses_set?(hook_id)
+      @responses[hook_id][type] = value
 
     end
 
-    class Status < BaseResponse
+    def clear(hook_id)
 
-      def initialize(status_code)
+      @responses[hook_id] = {}
 
-        @status_code = status_code
+    end
 
-      end
+    def get(hook_id)
 
-      def execute(sinatra)
+      hook_responses_set?(hook_id)? @responses[hook_id] : {}
 
-        sinatra.status @status_code
+    end
 
-      end
+    def hook_responses_set?(hook_id)
+
+      !@responses[hook_id].nil?
 
     end
 
@@ -93,7 +45,7 @@ module Hooks
 
     def initialize(hooks_to_store_count)
 
-      @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks",hooks_to_store_count)
+      @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
 
     end
 
@@ -143,25 +95,6 @@ module Hooks
     def clear_data(hook_id)
 
       @hook_storage.clear_data(hook_id)
-
-    end
-
-  end
-
-  class DataProxy < Data
-
-    attr_accessor :responses
-
-    def initialize(hooks_to_store_count)
-
-      super(hooks_to_store_count)
-
-    end
-
-    def read_data(hook_id)
-
-      responses.execute(hook_id)
-      super(hook_id)
 
     end
 
