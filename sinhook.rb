@@ -77,8 +77,8 @@ class SinHook < Sinatra::Base
     send method, "/hook/generate", :provides => :json do
 
       hook_id = settings.hooks.create
-      response_message(:success, "Hook ID: #{hook_id}")
-
+      "{\"Response\": \"#{MESSAGE_TYPE[:success]}\",\"Message\": \"Hook ID: #{hook_id}\", \"HookId\":\"#{hook_id}\"}"
+      
     end
 
   end
