@@ -1,6 +1,7 @@
 require_relative 'hooks.rb'
 require "sinatra"
 require "pry"
+require "json"
 
 class SinHook < Sinatra::Base
 
@@ -44,7 +45,11 @@ class SinHook < Sinatra::Base
 
       def response_message(type, message)
 
-        "{\"Response\": \"#{MESSAGE_TYPE[type]}\",\"Message\": \"#{message}\"}"
+        response = {}
+        response["Response"] = MESSAGE_TYPE[type]
+        response["Message"] = message
+
+        response.to_json
 
       end
 
@@ -76,8 +81,21 @@ class SinHook < Sinatra::Base
 
     send method, "/hook/generate", :provides => :json do
 
-      hook_id = settings.hooks.create
-      response_message(:success, "Hook ID: #{hook_id}")
+      hook_id = params[:name]
+
+      if settings.hooks.is_available?(hook_id)
+
+        status 405
+        response_message(:error, "Web hook with id: #{hook_id} already exists.")
+
+      else
+
+        hook_id = settings.hooks.create(hook_id)
+        message = "New web hook endpoint created. HookId: #{hook_id}."
+
+        response_message(:success, message)
+
+      end
 
     end
 

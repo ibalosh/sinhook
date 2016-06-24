@@ -60,9 +60,9 @@ module Hooks
     end
 
     # create hook
-    def create
+    def create(hook_id = nil)
 
-      @hook_storage.create
+      @hook_storage.create(hook_id)
 
     end
 

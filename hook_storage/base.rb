@@ -7,7 +7,7 @@ module HookStorage
 
     attr_accessor :hooks_to_store_count
 
-    def create
+    def create(hook_id = nil)
 
       raise StandardError 'not implemented'
 

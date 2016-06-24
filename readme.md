@@ -30,6 +30,12 @@ Web hook request endpoint will be created, and you will see a hook id for the ne
 
 This way you have created a unique dedicated endpoint you could use for testing web hooks. You can generate any number of endpoints.
 
+You can also create endpoints with name you would prefer. In that case, visit URL the following way:
+
+`http://localhost:8888/hook/generate?name=ibalosh`
+ 
+ Endpoint with name "ibalosh" will be created.
+
 ### Deleting endpoint
 
 To delete new web hook request endpoint, execute following request with tool like CURL.

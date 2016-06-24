@@ -21,10 +21,9 @@ module HookStorage
 
     end
 
-    def create
+    def create(hook_id = nil)
 
-      hook_id = generate_id
-
+      hook_id = generate_id if hook_id.nil? or hook_id.empty?
       create_folder(root_folder)
       create_folder(hook_folder(hook_id))
       hook_id
@@ -70,7 +69,7 @@ module HookStorage
 
     def is_available?(hook_id)
 
-      File.directory? hook_folder(hook_id)
+      !hook_id.nil? && File.directory?(hook_folder(hook_id))
 
     end
 
