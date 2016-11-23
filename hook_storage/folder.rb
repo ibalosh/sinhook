@@ -57,7 +57,7 @@ module HookStorage
 
     def read_data(hook_id)
 
-      "[" + hook_folder_files(hook_id).map { |file| File.read(file).strip }.join(",") + "]"
+      "[#{hook_folder_files(hook_id).map { |file| File.read(file).strip if File.exist?(file) }.compact.join(",")}]"
 
     end
 

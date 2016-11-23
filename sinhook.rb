@@ -9,7 +9,7 @@ class SinHook < Sinatra::Base
   configure do
 
     set :bind, '0.0.0.0'
-    set :hooks_to_store_count, 20
+    set :hooks_to_store_count, 30
     set :port, 8888
     set :environment, :production
 
