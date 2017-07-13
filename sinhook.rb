@@ -1,13 +1,12 @@
 require_relative 'hooks.rb'
-require "sinatra"
-require "pry"
-require "json"
+require 'sinatra'
+require 'pry'
+require 'json'
 
 class SinHook < Sinatra::Base
 
-  # configuration settings for the app.
+  # Configuration settings for the app.
   configure do
-
     set :bind, '0.0.0.0'
     set :hooks_to_store_count, 30
     set :port, 8888
@@ -15,218 +14,174 @@ class SinHook < Sinatra::Base
 
     set :hooks, Hooks::Data.new(settings.hooks_to_store_count)
     set :hooks_responses, Hooks::Responses.new
-
   end
 
-  # helpers which allow easy management of web hooks
-  module HookResponse
+  # Helpers which allow easy management of webhooks.
+  module HooksHelper
+    RESPONSE_TYPES = %i[status delay message].freeze
+    MAXIMUM_SECONDS_DELAY = 3600
 
-      RESPONSE_TYPES = [ :status, :delay, :message ]
-      MESSAGE_TYPE = { :success => 'Success', :error => 'Error' }
-      MAXIMUM_SECONDS_DELAY = 3600
+    def hooks
+      settings.hooks
+    end
 
-      def hook_exists?(hook_id)
+    def hooks_responses
+      settings.hooks_responses
+    end
 
-        halt 404 unless settings.hooks.is_available?(hook_id)
+    def hook_found?(hook_id)
+      halt 404 unless settings.hooks.is_available?(hook_id)
+    end
 
-      end
+    def valid_http_code?(number)
+      number >= 200 && number <= 600
+    end
 
-      def valid_http_code?(number)
+    def seconds_delay(seconds)
+      seconds > 0 && seconds < MAXIMUM_SECONDS_DELAY ? seconds : 0
+    end
 
-        number >= 200 and number <= 600
-
-      end
-
-      def seconds_delay(seconds)
-
-        (seconds > 0 && seconds < MAXIMUM_SECONDS_DELAY)? seconds : 0
-
-      end
-
-      def response_message(type, message)
-
-        response = {}
-        response["Response"] = MESSAGE_TYPE[type]
-        response["Message"] = message
-
-        response.to_json
-
-      end
-
-      def response_status(value)
-
-        valid_http_code?(value)? status(value) : status(500)
-
-      end
-
-      def response_delay(value)
-
-        sleep value
-
-      end
-
-      def execute_responses(hook_id)
-
-        settings.hooks_responses.get(hook_id).each { |key,value| send("response_#{key.to_s}",value) }
-
-      end
-
-  end
-
-  helpers HookResponse
-
-  # generate new web hook endpoint - with id for the web hook, allow using GET method too,
-  # so that the call can be done through browser too by quick IP/hook/generate URL visit.
-  [:get, :post].each do |method|
-
-    send method, "/hook/generate", :provides => :json do
-
-      hook_id = params[:name]
-
-      if settings.hooks.is_available?(hook_id)
-
-        status 405
-        response_message(:error, "Web hook with id: #{hook_id} already exists.")
-
+    def response_message(data)
+      if data.is_a?(Hash)
+        data.to_json
       else
-
-        hook_id = settings.hooks.create(hook_id)
-        message = "New web hook endpoint created. HookId: #{hook_id}."
-
-        response_message(:success, message)
-
+        response = {}
+        response['Message'] = data
+        response.to_json
       end
-
     end
 
+    def response_status(value)
+      valid_http_code?(value) ? status(value) : status(500)
+    end
+
+    def response_delay(value)
+      sleep value
+    end
+
+    def execute_responses(hook_id)
+      settings.hooks_responses.get(hook_id).each {|key, value| send("response_#{key}", value)}
+    end
   end
 
-  # delete existing hook and all its data
-  delete "/hook/:hook_id" do
+  helpers HooksHelper
 
-    hook_id = params[:hook_id]
-    hook_exists?(hook_id)
+  # ENDPOINTS:
 
-    if settings.hooks.delete(hook_id)
+  # Generate new webhook endpoint.
+  # Default or with name passed by parameter 'name'
+  post '/hook/generate', provides: :json do
+    hook_id = params[:name]
 
-      response_message(:success, "Endpoint #{hook_id} deleted.")
-
+    if hooks.is_available?(hook_id)
+      response_status(405)
+      response_message("Web hook with id: #{hook_id} already exists.")
     else
+      hook_id = settings.hooks.create(hook_id)
+      response_message({
+                           'Message' => 'New webhook endopint created.',
+                           'HookUrl' => "#{url.match(/(.*)\/generate/)[1]}/#{hook_id}",
+                       })
+    end
+  end
 
+  # Accept data on specific webhook endpoint.
+  post '/hook/:hook_id' do
+    hook_id = params[:hook_id]
+    hook_found?(hook_id)
+
+    execute_responses(hook_id)
+    hooks.set_data(hook_id, request.env['rack.input'].read)
+    hooks.read_data(hook_id)
+  end
+
+  # Delete existing webhook endpoint.
+  delete '/hook/:hook_id' do
+    hook_id = params[:hook_id]
+    hook_found?(hook_id)
+
+    if hooks.delete(hook_id)
+      response_message("Endpoint #{hook_id} deleted.")
+    else
       response_status(500)
-      response_message(:error, "Could not delete hook with id: #{hook_id}.")
+      response_message("Could not delete hook with id: #{hook_id}.")
+    end
+  end
 
+  # Read specific webhook endpoint response.
+  get '/hook/:hook_id', provides: :json do
+    hook_id = params[:hook_id]
+    hook_found?(hook_id)
+    execute_responses(hook_id)
+    hooks.read_data(hook_id)
+  end
+
+  # Update webhook endpoint, so that post/get /hook/:endpoint return modified response
+  # Optional modification parameters:
+  #
+  # ?response_status=500 (any valid http number)
+  # ?response_delay=5 (seconds, any valid number)
+  # ?clear=data
+  # ?clear=responses
+  # ?clear=data,responses
+  put '/hook/:hook_id' do
+    hook_id = params[:hook_id]
+    hook_found?(hook_id)
+    message = []
+
+    # Clear all webhook data.
+    if params[:clear].to_s.include? 'data'
+      hooks.clear_data(params[:hook_id])
+      message << 'Cleared data.'
     end
 
-  end
-
-  # accept data on specific hook catch url
-  post "/hook/:hook_id" do
-
-    hook_id = params[:hook_id]
-    hook_exists?(hook_id)
-    execute_responses(hook_id)
-    settings.hooks.set_data(hook_id, request.env["rack.input"].read)
-    settings.hooks.read_data(hook_id)
-
-  end
-
-  get "/hook/:hook_id", :provides => :json do
-
-    hook_id = params[:hook_id]
-    hook_exists?(hook_id)
-    execute_responses(hook_id)
-    settings.hooks.read_data(hook_id)
-
-  end
-
-  [:get, :post].each do |method|
-
-    # clear all data from an existing hook
-    send method, "/hook/:hook_id/clear", :provides => :json do
-
-      hook_exists?(params[:hook_id])
-      settings.hooks.clear_data(params[:hook_id])
-      response_message(:success, "List of hooks cleared.")
-
+    # Clear all webhook response modifications, like delayed response.
+    if params[:clear].to_s.include? 'response'
+      hooks_responses.clear(hook_id)
+      message << 'Cleared response modifications.'
     end
 
+    responses = {}
+    responses[:status] = params[:response_status].to_i
+    responses[:delay] = params[:response_delay].to_i
+
+    responses.each do |type, response|
+      unless response == 0
+        hooks_responses.add(hook_id, type, response)
+        message << "#{type.to_s.capitalize} set to #{response}."
+      end
+    end
+
+    response_message(message.join(' '))
   end
 
-  # update existing web hook, so that web hook will return status code :status_code for
-  # post/get /hook/:hook_id endpoints
-  put "/hook/:hook_id/status/:status_code" do
-
-    hook_id = params[:hook_id]
-    status_code = params[:status_code].to_i
-    hook_exists?(hook_id)
-
-    settings.hooks_responses.add(hook_id, :status, status_code)
-    response_message(:success, "Status code [#{status_code}] set.")
-
-  end
-
-  # update existing web hook, so that web hook will return :seconds delayed response for
-  # post/get /hook/:hook_id endpoints
-  put "/hook/:hook_id/delay/:seconds" do
-
-    hook_id = params[:hook_id]
-    seconds = seconds_delay(params[:seconds].to_i)
-    hook_exists?(hook_id)
-
-    settings.hooks_responses.add(hook_id, :delay, seconds)
-    response_message(:success, "Delayed response for #{seconds} seconds.")
-
-  end
-
-  # clear all web hook response update added, for
-  # post/get /hook/:hook_id endpoints with PUT methods above
-  put "/hook/:hook_id/clear_responses" do
-
-    hook_exists?(params[:hook_id])
-    settings.hooks_responses.clear(params[:hook_id])
-
-  end
-
-  # simple web hook endpoint with sole purpose to return response after :seconds seconds
-  [:get, :post, :put].each do |method|
-
-    send method, "/hook/delay/:seconds" do
-
+  # Webhook endpoint with sole purpose to return response after :seconds seconds
+  %i[get post put].each do |method|
+    send method, '/hook/delay/:seconds' do
       seconds = seconds_delay(params[:seconds].to_i)
       response_delay(seconds)
-      response_message(:success, "Delayed response for #{seconds} seconds.")
-
+      response_message("Delayed response for #{seconds} seconds.")
     end
-
   end
 
-  # simple web hook endpoint with sole purpose to return response with :status_code status
-  [:get, :post, :put].each do |method|
-
+  # Webhook endpoint with sole purpose to return response with :status_code status
+  %i[get post put].each do |method|
     # get hook data
-    send method, "/hook/status/:status_code" do
-
+    send method, '/hook/status/:status_code' do
       http_code = params[:status_code].to_i
       response_status(http_code)
-      response_message(:success, "Returned status: #{http_code}.")
-
+      response_message("Returned status: #{http_code}.")
     end
-
   end
 
+  # GENERAL ENDPOINTS:
   not_found do
-
-    halt 404, response_message(:error, "End point not found.")
-
+    halt 404, response_message('End point not found.')
   end
 
   error do
-
-    response_message(:error, "Ooops, sorry there was a nasty error - #{env['sinatra.error'].name}")
-
+    response_message("Ooops, sorry there was a nasty error - #{env['sinatra.error'].name}.")
   end
-
 end
 
 SinHook.run!
