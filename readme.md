@@ -1,147 +1,186 @@
 # SinHook
 
-SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which was created to simplify in-house web hook testing. 
+SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing. 
 SinHook will collect JSON based requests and allow debugging them. 
 
-You can easily run the SinHook app locally to inspect and debug web hook requests, without worrying that your web hook requests will end up online.
+You can easily run the SinHook app locally to inspect and debug webhook requests, without worrying that your webhook requests will end up online.
 
 ## Using the app
 
 To use the SinHook application, all you need to do is start up the Sinatra app by executing the following command:
 
 ``` ruby
-ruby sinhook
+bundle exec ruby sinhook.rb
 ```
   
-Sinatra web app should be online on your machine at following web address: `localhost:8888`.  
+Sinatra web app should be online on your machine at following web address: `http://localhost:8888`.  
 Now that the Sinatra web app is online, it is ready to be used. 
 
-You can try it out by generating couple of web hook endpoints and send requests to them.
+You can try it out by generating couple of webhook endpoints and send requests to them.
 
-## Web hook endpoints
+## Endpoints
 
 Below, we will show you all the endpoints Sinhook app has to offer. 
-By accessing these endpoints by application like CURL, you can manage your web hooks, and control behaviour for each of them.
+By accessing these endpoints by application like CURL, you can manage your webhooks, and control behaviour for each of them.
 
-### Creating endpoint
+### POST /hook/generate
 
-To create a new web hook request endpoint, visit `http://localhost:8888/hook/generate` URL in your browser. 
-Web hook request endpoint will be created, and you will see a hook id for the new endpoint on the page.
+Let's you create new webhook endpoint.
 
-This way you have created a unique dedicated endpoint you could use for testing web hooks. You can generate any number of endpoints.
+Example request with curl:
 
-You can also create endpoints with name you would prefer. In that case, visit URL the following way:
+``` shell 
+curl -X POST 'http://localhost:8888/hook/generate'
+```
 
-`http://localhost:8888/hook/generate?name=ibalosh`
- 
- Endpoint with name "ibalosh" will be created.
+Example response:
 
-### Deleting endpoint
+``` json
+{
+    "Message":"New webhook endopint created.",
+    "HookUrl":"http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83"
+}
+```
 
-To delete new web hook request endpoint, execute following request with tool like CURL.
+Querystring parameters:
+
+* **name** - allows you to create endpoint with specific name
+
+Example request with curl:
+
+``` shell 
+curl -X POST 'http://localhost:8888/hook/generate?name=ibalosh'
+```
+
+Example response:
+
+``` json
+{
+    "Message":"New webhook endopint created.",
+    "HookUrl":"http://localhost:8888/hook/ibalosh"
+}
+```
+
+### POST /hook/{hook_id}
+
+Let's you send a request with data to an endpoint
+
+``` shell 
+curl -X POST 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83 -d {"{'Data':'Hello'}"}'
+```
+
+Example response:
+
+``` json
+[{'Data':'Hello'}]
+``` 
+
+### GET /hook/{hook_id}
+
+Let's you retrieve data from the endpoint.
+
+``` shell 
+curl -X GET 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83'
+```
+
+Example response:
+
+``` json
+[{'Data':'Hello'}]
+``` 
+
+### /DELETE /hook/{hook_id}
+
+Let's you delete a webhook endpoint created before.
+
+Example request with curl:
 
 ``` curl
 CURL -X DELETE http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
 ``` 
 
-`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+Example response:
+
+``` json
+{
+    "Message":"Endpoint 20bf06f7-aa94-a3ec-89cd-7710f1e1fc83 deleted."
+}
+```
  
-Web hook request endpoint will be deleted.
+### /PUT /hook/{hook_id}
 
-### Sending requests to the endpoint
+Let's you add additional response options to POST/GET /hook/{hook_id} endpoints.
+For example, you could set additional response to be a delay in response of 5 seconds.
 
-To send a request to an endpoint, send data to `http://localhost:8888/hook/:hook_id` URL. 
-Doing this with CURL would look something like this:
+Querystring parameters:
+
+* **clear** - allows you to clear all data or responses from the endpoint. Possible values: 'data','response', 'data,response'
+* **response_status** - allows you to set http status to X number for each next POST/GET request to /hook/{hook_id}
+* **response_delay** - allows you to set delayed response for X seconds for each next POST/GET request to /hook/{hook_id}
+
+Example request with curl (sets http response to 500, and delays response for 3 seconds):
 
 ``` curl
-CURL -X POST http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8 -d "{'Hello World.'}"
+CURL -X PUT 'http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8?response_status=500&response_delay=3' -d ''"
 ``` 
 
-`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
+Example response:
 
-### Viewing request responses on the endpoint  
-
-To view web hook requests you sent to an endpoint, all you need to do is visit the web hook endpoint URL, or initiate a GET request.
-
-Web hook URL would look something like:
-
-``` html
-http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
+``` json
+{
+    "Message":"Status set to 500. Delay set to 3."
+}
 ```
 
-`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
-
-When visiting the page, you will see the top last 20 web hooks requests. Older requests are not stored. 
-The number of requests stored can be configured in the code configuration.
-
-You can view the web hook endpoint responses also by doing a call like:
+Example request with curl (clears http response to 200, delays, and clears all data from /hook/{hook_id}):
 
 ``` curl
-CURL -X GET http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8
+CURL -X PUT 'http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8?clear=data,response&response_status=500&response_delay=3' -d ''"
+``` 
+
+Example response:
+
+``` json
+{
+    "Message":"Cleared data. Cleared response modifications. Status set to 500. Delay set to 3."
+}
 ```
 
-### Clear request responses on the endpoint  
+### POST/GET /hook/delay/{seconds}
 
-When testing, you might have generated bunch of data on your web hook request endpoint. You might want to clear all data on your web hook endpoint.
-In order to do that execute the following request.
+Sole purpose of this endpoint is to return response after X seconds.
 
-``` curl
-CURL -X GET http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/clear"
-``` 
-
-`8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
-
-You could do this with visiting the URL too by browser. Once you execute the command, response on that endpoint will be empty.
-
-## HTTP status codes endpoints
-
-Sometimes you need to test whether your web app responds correctly to certain http statuses of web hook endpoints.
-In order to test that you could use SinHook app endpoints which return certain http statuses, depending on which one you request.
-
-To try this option out, initiate a GET/PUT/POST request like the following:
+Example request with curl:
 
 ``` curl
-CURL -X GET http://localhost:8888/hook/status/404"
+curl -X GET 'http://localhost:8888/hook/delay/2'
 ``` 
 
-This request will return a response with 404 status code.
+Example response:
+
+``` json
+{
+    "Message":"Delayed response for 2 seconds."
+}
+``` 
  
-## Delayed response endpoints
+### POST/GET /hook/status/{code}
 
-Sometimes you need to test whether your web app responds correctly when the response of the endpoint is delayed X seconds.
-In order to test that you could use SinHook app endpoints which return response after X seconds.
+Sole purpose of this endpoint is to return http response X.
 
-To try this option out, initiate a GET/PUT/POST request like the following:
-
-``` curl
-CURL -X GET http://localhost:8888/hook/delay/3"
-``` 
-
-This request will return a response after 3 seconds. 
-
-### Adding response properties to hook endpoints 
-
-Sometimes, you need to create a hook endpoint which will work correctly and return status code 200, but then later on you would want to that endpoint to behave bit differently.
-Maybe you would like endpoint to return a response, but with different http status, or with response being delayed.
-
-In order to do something like that all you need to to is do a CURL command like this:
+Example request with curl:
 
 ``` curl
-CURL -X PUT http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/status/500"
-CURL -X PUT http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/delay/3"
+curl -X GET 'http://localhost:8888/hook/status/500'
 ``` 
 
-* `8a85d917-22af-7928-a4e1-148c980b3bc8` would be the id of the endpoint which you have created before.
-* `500` would be the status code `http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8` endpoint will return from now on for GET/POST requests
-* `3` would be the seconds delay response `http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8` endpoint will return from now on for GET/POST requests
+Example response:
 
-To clear the added responses to the endpoint, you need to use the following command:
-
-``` curl
-CURL -X PUT http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8/clear_responses"
+``` json
+{
+    "Message":"Returned status: 500."
+}
 ``` 
-
-Once this command is executed, web hook endpoint will work as it did before adding response properties.
 
 ## Notes
 
