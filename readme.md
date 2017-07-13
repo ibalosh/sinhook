@@ -72,7 +72,7 @@ curl -X POST 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83 -d
 Example response:
 
 ``` json
-[{'Data':'Hello'}]
+[{"Data":"Hello"}]
 ``` 
 
 ### GET /hook/{hook_id}
@@ -86,7 +86,7 @@ curl -X GET 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83'
 Example response:
 
 ``` json
-[{'Data':'Hello'}]
+[{"Data":"Hello"}]
 ``` 
 
 ### /DELETE /hook/{hook_id}
