@@ -1,5 +1,3 @@
-# SinHook
-
 SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing. 
 SinHook will collect JSON based requests and allow debugging them. 
 
@@ -7,7 +5,7 @@ You can easily run the SinHook app locally to inspect and debug webhook requests
 
 ## Using the app
 
-To use the SinHook application, all you need to do is start up the Sinatra app by executing the following command:
+To use the app, all you need to do is execute the following command:
 
 ``` ruby
 bundle exec ruby sinhook.rb
@@ -16,12 +14,12 @@ bundle exec ruby sinhook.rb
 Sinatra web app should be online on your machine at following web address: `http://localhost:8888`.  
 Now that the Sinatra web app is online, it is ready to be used. 
 
-You can try it out by generating couple of webhook endpoints and send requests to them.
+You can try it out by generating couple of webhook endpoints.
 
 ## Endpoints
 
-Below, we will show you all the endpoints Sinhook app has to offer. 
-By accessing these endpoints by application like CURL, you can manage your webhooks, and control behaviour for each of them.
+Here's the list of endpoints and options Sinhook has to offer. 
+By accessing these endpoints with tools like CURL, you can manage your list of webhooks, and control behaviour for each one of them.
 
 ### POST /hook/generate
 
