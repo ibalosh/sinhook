@@ -67,5 +67,9 @@ module Hooks
     def clear_data(hook_id)
       @hook_storage.clear_data(hook_id)
     end
+
+    def endpoints
+      @hook_storage.endpoints
+    end
   end
 end

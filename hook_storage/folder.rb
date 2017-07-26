@@ -50,6 +50,10 @@ module HookStorage
       !hook_id.nil? && File.directory?(hook_folder(hook_id))
     end
 
+    def endpoints
+      Dir.entries(root_folder).select { |f|  File.directory?(hook_folder(f)) && !(f.eql?(".") || f.eql?("..")) }
+    end
+
     private
 
     def create_folder(folder)

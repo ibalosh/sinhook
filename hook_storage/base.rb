@@ -29,6 +29,10 @@ module HookStorage
       raise StandardError 'not implemented'
     end
 
+    def endpoints
+      raise StandardError 'not implemented'
+    end
+
     protected
 
     def generate_id

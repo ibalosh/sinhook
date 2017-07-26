@@ -76,6 +76,9 @@ class SinHook < Sinatra::Base
     if hooks.is_available?(hook_id)
       response_status(405)
       response_message("Web hook with id: #{hook_id} already exists.")
+    elsif hook_id.eql?('list')
+      response_status(405)
+      response_message("#{hook_id} is a reserved word.")
     else
       hook_id = settings.hooks.create(hook_id)
       response_message({
@@ -106,6 +109,10 @@ class SinHook < Sinatra::Base
       response_status(500)
       response_message("Could not delete hook with id: #{hook_id}.")
     end
+  end
+
+  get '/hook/list', provides: :json do
+    hooks.endpoints.map { |e| "#{url.match(/(.*)\/list/)[0]}/#{e}" }.to_json
   end
 
   # Read specific webhook endpoint response.
