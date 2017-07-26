@@ -112,7 +112,7 @@ class SinHook < Sinatra::Base
   end
 
   get '/hook/list', provides: :json do
-    hooks.endpoints.map { |e| "#{url.match(/(.*)\/list/)[0]}/#{e}" }.to_json
+    hooks.endpoints.map { |e| "#{url.match(/(.*)\/list/)[1]}/#{e}" }.to_json
   end
 
   # Read specific webhook endpoint response.
