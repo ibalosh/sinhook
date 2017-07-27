@@ -181,6 +181,10 @@ class SinHook < Sinatra::Base
     end
   end
 
+  get '/robots.txt', provides: :text do
+    "User-agent: *\nDisallow: /"
+  end
+
   # GENERAL ENDPOINTS:
   not_found do
     halt 404, response_message('End point not found.')
