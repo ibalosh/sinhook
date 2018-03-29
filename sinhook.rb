@@ -1,15 +1,28 @@
 require_relative 'hooks.rb'
+require_relative 'config/config'
 require 'sinatra'
 require 'pry'
 require 'json'
 
 class SinHook < Sinatra::Base
 
+  # load configuration file
+  def self.config
+    App.config.load!(:general)
+    App.config.general
+  end
+
+  if config[:security][:popup]
+    use Rack::Auth::Basic, "Restricted Area" do |username, password|
+      username == config[:security][:username] and password == config[:security][:password]
+    end
+  end
+
   # Configuration settings for the app.
   configure do
     set :bind, '0.0.0.0'
-    set :hooks_to_store_count, 30
-    set :port, 8888
+    set :hooks_to_store_count,  config[:hooks_to_store]
+    set :port,                  config[:port]
     set :environment, :production
 
     set :hooks, Hooks::Data.new(settings.hooks_to_store_count)

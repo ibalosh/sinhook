@@ -4,4 +4,5 @@ hooks
 **/*.DS_Store
 **/*.idea
 **/Gemfile.lock
+config/general.yaml
 
