@@ -16,6 +16,16 @@ Now that the Sinatra web app is online, it is ready to be used.
 
 You can try it out by generating couple of webhook endpoints.
 
+## Configuration
+
+Once you run the web app for the first time, in config folder, new configuration file called 'general.yaml' will be created.
+In this file you can configure things like port to use, number of total hooks to store, whether to use authorization.
+
+## Enable authorization
+
+If you would like to add basic access authentication, all you need to do is enable it in 'security' section in the 'general.yaml' file.
+Username and password stored in configuration file will be required once you enable authentication. 
+
 ## Endpoints
 
 Here's the list of endpoints and options Sinhook has to offer. 
