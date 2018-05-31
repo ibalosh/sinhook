@@ -16,7 +16,7 @@ module App
     attr_accessor :test_environment,
                   :test_execution
 
-    def load!(name, options = [])
+    def load!(name, encrypted_yaml)
       filename = "#{name}.yaml"
       default_filename = default_filename(filename)
 
@@ -28,20 +28,17 @@ module App
         filename = default_filename
       end
 
-      generate_attr_reader name, filter(load_from_yaml(filename), options)
+      generate_attr_reader name, load_from_yaml(filename, encrypted_yaml)
     end
 
     private
 
-    def filter(data, filters)
-      filters = [filters] unless filters.is_a? Array
-      result = data
-      filters.each { |filter| result = result[filter] }
-      result
-    end
-
-    def load_from_yaml(filename)
-      symbolize_keys SecureYaml.load(File.open(file_full_path(filename)))
+    def load_from_yaml(filename, encrypted_yaml)
+      if encrypted_yaml
+        symbolize_keys SecureYaml.load(File.open(file_full_path(filename)))
+      else
+        symbolize_keys YAML.load_file(file_full_path(filename))
+      end
     end
 
     def verify_config_file(filename)
