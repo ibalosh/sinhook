@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require_relative 'hook_storage/folder'
+require_relative 'hook_storage/ram'
 require 'sinatra'
 
 module Hooks
@@ -35,8 +36,14 @@ module Hooks
   # Currently only one type of web hook data holders is available - Folder storage - which holds all data
   # for web hooks locally, in folders and files.
   class Data
-    def initialize(hooks_to_store_count)
-      @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
+    def initialize(hooks_to_store_count, storage_type = :folder)
+      case storage_type
+        when :folder
+        @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
+
+        else
+        @hook_storage = HookStorage::RAM.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
+      end
     end
 
     def hooks_to_store_count

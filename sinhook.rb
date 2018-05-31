@@ -22,10 +22,11 @@ class SinHook < Sinatra::Base
   configure do
     set :bind, '0.0.0.0'
     set :hooks_to_store_count,  config[:hooks_to_store]
+    set :hooks_storage,         config[:hooks_storage].to_sym
     set :port,                  config[:port]
     set :environment, :production
 
-    set :hooks, Hooks::Data.new(settings.hooks_to_store_count)
+    set :hooks, Hooks::Data.new(settings.hooks_to_store_count, settings.hooks_storage)
     set :hooks_responses, Hooks::Responses.new
   end
 

@@ -22,7 +22,7 @@ module App
 
       # Config file can't be loaded, use default.
       begin
-        copy_config_file(default_filename, filename)
+        copy_config_file(default_filename, filename) unless config_file_exists?(filename)
       rescue Exception => e
         puts "File #{default_filename} could not be copied to #{filename}. Default filename used. Error details:\n\n #{e}"
         filename = default_filename

@@ -5,27 +5,27 @@ module HookStorage
   class Storage
     attr_accessor :hooks_to_store_count
 
-    def create(_hook_id = nil)
+    def create(hook_id = nil)
       raise StandardError 'not implemented'
     end
 
-    def delete(_hook_id)
+    def delete(hook_id)
       raise StandardError 'not implemented'
     end
 
-    def is_available?(_hook_id)
+    def is_available?(hook_id)
       raise StandardError 'not implemented'
     end
 
-    def set_data(_hook_id, _hook_data)
+    def set_data(hook_id, hook_data)
       raise StandardError 'not implemented'
     end
 
-    def read_data(_hook_id)
+    def read_data(hook_id)
       raise StandardError 'not implemented'
     end
 
-    def clear_data(_hook_id)
+    def clear_data(hook_id)
       raise StandardError 'not implemented'
     end
 
