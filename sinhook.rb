@@ -12,7 +12,7 @@ class SinHook < Sinatra::Base
     App.config.general
   end
 
-  if config[:security][:popup]
+  if config[:security][:basic_auth]
     use Rack::Auth::Basic, "Restricted Area" do |username, password|
       username == config[:security][:username] and password == config[:security][:password]
     end

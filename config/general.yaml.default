@@ -1,5 +1,5 @@
 security:
- popup:         false
+ basic_auth:    false
  username:      admin
  password:      admin
 

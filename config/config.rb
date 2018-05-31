@@ -8,8 +8,6 @@ require 'singleton'
 # encrypt_property_for_yaml encrypt [SECRET_PASSWORD] [CONTENT_TO_ENCRYPT]
 
 module App
-  TEST_ENVIRONMENTS = %w[staging staging2 production].freeze
-
   def self.config
     @@config ||= Configurator.new
   end
@@ -20,11 +18,16 @@ module App
 
     def load!(name, options = [])
       filename = "#{name}.yaml"
+      default_filename = default_filename(filename)
 
-      verify_config_file(default_filename(filename))
-      copy_config_file(default_filename(filename), filename) unless config_file_exists?(filename)
+      # Config file can't be loaded, use default.
+      begin
+        copy_config_file(default_filename, filename)
+      rescue Exception => e
+        puts "File #{default_filename} could not be copied to #{filename}. Default filename used. Error details:\n\n #{e}"
+        filename = default_filename
+      end
 
-      verify_config_file(filename)
       generate_attr_reader name, filter(load_from_yaml(filename), options)
     end
 
