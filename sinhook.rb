@@ -7,7 +7,7 @@ require 'json'
 class SinHook < Sinatra::Base
   # load configuration file
   def self.config
-    App.config.load!(:general, ENV['ENCRYPTED_YAML'].strip.downcase.include?('true'))
+    App.config.load!(:general, ENV['ENCRYPTED_YAML'].to_s.strip.downcase.include?('true'))
     App.config.general
   end
 
