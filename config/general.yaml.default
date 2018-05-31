@@ -3,6 +3,5 @@ security:
  username:      admin
  password:      admin
 
-port:           8888
 hooks_to_store: 50
 hooks_storage:  ram

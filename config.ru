@@ -1,0 +1,2 @@
+require './sinhook'
+run SinHook

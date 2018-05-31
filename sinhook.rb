@@ -1,6 +1,6 @@
 require_relative 'hooks.rb'
 require_relative 'config/config'
-require 'sinatra'
+require 'sinatra/base'
 require 'pry'
 require 'json'
 
@@ -23,7 +23,6 @@ class SinHook < Sinatra::Base
     set :bind, '0.0.0.0'
     set :hooks_to_store_count,  config[:hooks_to_store]
     set :hooks_storage,         config[:hooks_storage].to_sym
-    set :port,                  config[:port]
     set :environment, :production
 
     set :hooks, Hooks::Data.new(settings.hooks_to_store_count, settings.hooks_storage)
@@ -208,5 +207,3 @@ class SinHook < Sinatra::Base
     response_message("Ooops, sorry there was a nasty error - #{env['sinatra.error'].name}.")
   end
 end
-
-SinHook.run!
