@@ -6,7 +6,7 @@ module HookStorage
     attr_accessor :hooks_to_store_count,
                   :hooks
 
-    def initialize(folder, hooks_to_store_count)
+    def initialize(hooks_to_store_count)
       @hooks_to_store_count = hooks_to_store_count
       @hooks = {}
     end

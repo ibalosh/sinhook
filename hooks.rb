@@ -42,7 +42,7 @@ module Hooks
         @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
 
         else
-        @hook_storage = HookStorage::RAM.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
+        @hook_storage = HookStorage::RAM.new(hooks_to_store_count)
       end
     end
 
