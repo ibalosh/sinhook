@@ -1,6 +1,8 @@
-SinHook is a super simple [Sinatra app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing. 
-SinHook will collect JSON based requests and allow debugging them. 
+SinHook is a super simple [Sinatra web app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing.
+It was created as a replacement for [Requestb.in](https://github.com/Runscope/requestbin#readme) with few additional features, 
+like delayed responses, responses with specific status. 
 
+SinHook only requires Ruby to be installed. Web app will preserve your JSON based requests and allow debugging them.  
 You can easily run the SinHook app locally to inspect and debug webhook requests, without worrying that your webhook requests will end up online.
 
 ## Using the app
@@ -8,8 +10,14 @@ You can easily run the SinHook app locally to inspect and debug webhook requests
 To use the app, all you need to do is execute the following command:
 
 ``` ruby
-bundle exec ruby sinhook.rb
+bundle install
+ENCRYPTED_YAML=true PROPERTIES_ENCRYPTION_PASSWORD=your_password rackup -p 8888
 ```
+
+*ENCRYPTED_YAML* and *PROPERTIES_ENCRYPTION_PASSWORD* are optional environment variables, and only required if you will 
+want to encrypt content in your configuration files.
+
+*-p* parameter allows you to choose port on which SinHook will run. 
   
 Sinatra web app should be online on your machine at following web address: `http://localhost:8888`.  
 Now that the Sinatra web app is online, it is ready to be used. 
