@@ -1,11 +1,10 @@
 # encoding: utf-8
-
 require_relative 'hook_storage/folder'
 require_relative 'hook_storage/ram'
 require 'sinatra'
 
 module Hooks
-  # Responses class represents a holder which will hold all responses tied to hooks, while server is up and running.
+  # Responses class represents objects which will hold all responses tied to hooks, while server is up and running.
   #
   # It's main function is to hold response types in hash form like: [HOOK_ID][STATUS_TYPE][VALUE]
   # These responses types are picked up by sinatra app and handled

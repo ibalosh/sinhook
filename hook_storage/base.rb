@@ -1,6 +1,7 @@
 require 'guid'
 
-# Interface for storing web hooks
+# Interface for storing web hooks.
+# These are base methods for managing and reading web hook entities.
 module HookStorage
   class Storage
     attr_accessor :hooks_to_store_count

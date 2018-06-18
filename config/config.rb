@@ -2,10 +2,13 @@ require 'yaml'
 require 'secure_yaml'
 require 'singleton'
 
-# in order to load config files, you need to provide encryption password to the environment
+# In order to load config files with encrypted values, you need to provide encryption password to the environment.
+# You can provide the password with environment variable like: PROPERTIES_ENCRYPTION_PASSWORD=my_password
 #
-# to encrypt content, use the following command:
+# To encrypt content, which you can add to your YAML files, use the following command:
+#
 # encrypt_property_for_yaml encrypt [SECRET_PASSWORD] [CONTENT_TO_ENCRYPT]
+#
 
 module App
   def self.config
