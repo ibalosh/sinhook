@@ -8,6 +8,8 @@ By time, the app was extended with couple of additional features, like testing w
   
 The app only requires [Ruby](https://www.ruby-lang.org/en/) to be installed. Web app will preserve your JSON based requests and allow debugging.  
 
+Check out the [wiki page](https://github.com/ibalosh/sinhook/wiki) for more details.
+
 ## Demo
 
 Sinhook repository is deployed to [heroku](https://www.heroku.com/). You can play with the app at **https://sinhook.herokuapp.com**.
