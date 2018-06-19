@@ -1,203 +1,24 @@
-SinHook is a super simple [Sinatra web app](http://www.sinatrarb.com/) which was created to simplify in-house webhook testing.
-It was created as a replacement for [Requestb.in](https://github.com/Runscope/requestbin#readme) with few additional features, 
-like delayed responses, responses with specific status. 
+Sinhook is a super simple [Sinatra web app](http://www.sinatrarb.com/) which was created to simplify in-house web hook testing.
 
-SinHook only requires Ruby to be installed. Web app will preserve your JSON based requests and allow debugging them.  
-You can easily run the SinHook app locally to inspect and debug webhook requests, without worrying that your webhook requests will end up online.
+Back in the days, idea for Sinhook came from the need to replace [Requestb.in](https://github.com/Runscope/requestbin#readme) with something 
+that would work locally and would be more reliable. This would make web hook testing safer, provide better performance and tests would be less flacky.
 
-## Using the app
-
-To use the app, all you need to do is execute the following command:
-
-``` ruby
-bundle install
-ENCRYPTED_YAML=true PROPERTIES_ENCRYPTION_PASSWORD=your_password rackup -p 8888
-```
-
-*ENCRYPTED_YAML* and *PROPERTIES_ENCRYPTION_PASSWORD* are optional environment variables, and only required if you will 
-want to encrypt content in your configuration files.
-
-*-p* parameter allows you to choose port on which SinHook will run. 
+By time, the app was extended with couple of additional features, like testing webhooks behind [basic auth](https://github.com/ibalosh/sinhook/wiki/Configuration), 
+[delayed webhook responses](https://github.com/ibalosh/sinhook/wiki/PUT--hook-%7Bhook_id%7D), specific HTTP status responses.
   
-Sinatra web app should be online on your machine at following web address: `http://localhost:8888`.  
-Now that the Sinatra web app is online, it is ready to be used. 
+The app only requires [Ruby](https://www.ruby-lang.org/en/) to be installed. Web app will preserve your JSON based requests and allow debugging.  
 
-You can try it out by generating couple of webhook endpoints.
+## Demo
 
-## Configuration
+Sinhook repository is deployed to [heroku](https://www.heroku.com/). You can play with the app at **https://sinhook.herokuapp.com**.
+Check out the features at the [wiki page](https://github.com/ibalosh/sinhook/wiki). 
 
-Once you run the web app for the first time, in config folder, new configuration file called 'general.yaml' will be created.
-In this file you can configure things like port to use, number of total hooks to store, whether to use authorization.
+For example you could create a webhook test endpoint by running:
 
-## Enable authorization
-
-If you would like to add basic access authentication, all you need to do is enable it in 'security' section in the 'general.yaml' file.
-Username and password stored in configuration file will be required once you enable authentication. 
-
-## Endpoints
-
-Here's the list of endpoints and options Sinhook has to offer. 
-By accessing these endpoints with tools like CURL, you can manage your list of webhooks, and control behaviour for each one of them.
-
-### POST /hook/generate
-
-Let's you create new webhook endpoint.
-
-Example request with curl:
-
-``` shell 
-curl -X POST 'http://localhost:8888/hook/generate'
+``` bash
+curl -X POST https://sinhook.herokuapp.com/hook/generate
 ```
-
-Example response:
-
-``` json
-{
-    "Message":"New webhook endopint created.",
-    "HookUrl":"http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83"
-}
-```
-
-Querystring parameters:
-
-* **name** - allows you to create endpoint with specific name
-
-Example request with curl:
-
-``` shell 
-curl -X POST 'http://localhost:8888/hook/generate?name=ibalosh'
-```
-
-Example response:
-
-``` json
-{
-    "Message":"New webhook endopint created.",
-    "HookUrl":"http://localhost:8888/hook/ibalosh"
-}
-```
-
-### POST /hook/{hook_id}
-
-Let's you send a request with data to an endpoint
-
-``` shell 
-curl -X POST 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83 -d {"{'Data':'Hello'}"}'
-```
-
-Example response:
-
-``` json
-[{"Data":"Hello"}]
-``` 
-
-### GET /hook/{hook_id}
-
-Let's you retrieve data from the endpoint.
-
-``` shell 
-curl -X GET 'http://localhost:8888/hook/20bf06f7-aa94-a3ec-89cd-7710f1e1fc83'
-```
-
-Example response:
-
-``` json
-[{"Data":"Hello"}]
-``` 
-
-### /DELETE /hook/{hook_id}
-
-Let's you delete a webhook endpoint created before.
-
-Example request with curl:
-
-``` curl
-CURL -X DELETE http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8"
-``` 
-
-Example response:
-
-``` json
-{
-    "Message":"Endpoint 20bf06f7-aa94-a3ec-89cd-7710f1e1fc83 deleted."
-}
-```
- 
-### /PUT /hook/{hook_id}
-
-Let's you add additional response options to POST/GET /hook/{hook_id} endpoints.
-For example, you could set additional response to be a delay in response of 5 seconds.
-
-Querystring parameters:
-
-* **clear** - allows you to clear all data or responses from the endpoint. Possible values: 'data','response', 'data,response'
-* **response_status** - allows you to set http status to X number for each next POST/GET request to /hook/{hook_id}
-* **response_delay** - allows you to set delayed response for X seconds for each next POST/GET request to /hook/{hook_id}
-
-Example request with curl (sets http response to 500, and delays response for 3 seconds):
-
-``` curl
-CURL -X PUT 'http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8?response_status=500&response_delay=3' -d ''"
-``` 
-
-Example response:
-
-``` json
-{
-    "Message":"Status set to 500. Delay set to 3."
-}
-```
-
-Example request with curl (clears http response to 200, delays, and clears all data from /hook/{hook_id}):
-
-``` curl
-CURL -X PUT 'http://localhost:8888/hook/8a85d917-22af-7928-a4e1-148c980b3bc8?clear=data,response&response_status=500&response_delay=3' -d ''"
-``` 
-
-Example response:
-
-``` json
-{
-    "Message":"Cleared data. Cleared response modifications. Status set to 500. Delay set to 3."
-}
-```
-
-### POST/GET /hook/delay/{seconds}
-
-Sole purpose of this endpoint is to return response after X seconds.
-
-Example request with curl:
-
-``` curl
-curl -X GET 'http://localhost:8888/hook/delay/2'
-``` 
-
-Example response:
-
-``` json
-{
-    "Message":"Delayed response for 2 seconds."
-}
-``` 
- 
-### POST/GET /hook/status/{code}
-
-Sole purpose of this endpoint is to return http response X.
-
-Example request with curl:
-
-``` curl
-curl -X GET 'http://localhost:8888/hook/status/500'
-``` 
-
-Example response:
-
-``` json
-{
-    "Message":"Returned status: 500."
-}
-``` 
 
 ## Notes
 
-The app accepts only valid JSON requests, and make sure that folder where the app is stored is writable for the app.
+The app accepts only valid JSON requests. Make sure that folder where the app is stored is writable for the app.
