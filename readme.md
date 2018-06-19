@@ -1,3 +1,7 @@
+# Sinhook
+
+[![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://www.opensource.org/licenses/MIT)
+
 Sinhook is a super simple [Sinatra web app](http://www.sinatrarb.com/) which was created to simplify in-house web hook testing.
 
 Back in the days, idea for Sinhook came from the need to replace [Requestb.in](https://github.com/Runscope/requestbin#readme) with something 
