@@ -1,7 +1,8 @@
-security:
- basic_auth:    false
- username:      admin
- password:      admin
+# settings
+# each can be also passed as Environment variable with same name like: basic_auth=true rackup ...
+basic_auth:    false
+username:      admin
+password:      admin
 
 hooks_to_store: 50
 hooks_storage:  ram

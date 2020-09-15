@@ -7,13 +7,17 @@ require 'json'
 class SinHook < Sinatra::Base
   # load configuration file
   def self.config
-    App.config.load!(:general, ENV['ENCRYPTED_YAML'].to_s.strip.downcase.include?('true'))
-    App.config.general
+    return @config unless @config.nil?
+    @config = App.config.load!(:general, ENV['ENCRYPTED_YAML'].to_s.strip.downcase.include?('true'))
+
+    # update config with environment variables if they exist
+    @config.keys.each { |key| @config[key] = ENV[key.to_s] unless ENV[key.to_s].nil? }
+    @config
   end
 
-  if config[:security][:basic_auth]
+  if config[:basic_auth].to_s.strip == 'true'
     use Rack::Auth::Basic, "Restricted Area" do |username, password|
-      username == config[:security][:username] and password == config[:security][:password]
+      username == config[:username] and password == config[:password]
     end
   end
 
