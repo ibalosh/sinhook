@@ -11,13 +11,13 @@ class SinHook < Sinatra::Base
     @config = App.config.load!(:general, ENV['ENCRYPTED_YAML'].to_s.strip.downcase.include?('true'))
 
     # update config with environment variables if they exist
-    @config.keys.each { |key| @config[key] = ENV[key.to_s] unless ENV[key.to_s].nil? }
+    @config.keys.each { |key| @config[key] = ENV[key.to_s.upcase] unless ENV[key.to_s.upcase].nil? }
     @config
   end
 
-  if config[:basic_auth].to_s.strip == 'true'
+  if config[:app_basic_auth].to_s.strip == 'true'
     use Rack::Auth::Basic, "Restricted Area" do |username, password|
-      username == config[:username] and password == config[:password]
+      username == config[:app_username] and password == config[:app_password]
     end
   end
 
