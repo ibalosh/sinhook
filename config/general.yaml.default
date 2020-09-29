@@ -1,8 +1,9 @@
 # settings
 # each can be also passed as Environment variable with same name, but uppercase, like: APP_BASIC_AUTH=true rackup ...
+
 app_basic_auth:     false
 app_username:       admin
 app_password:       admin
 
 hooks_to_store:     50
-hooks_storage:      ram
+hooks_storage:      folder

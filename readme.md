@@ -14,17 +14,6 @@ The app only requires [Ruby](https://www.ruby-lang.org/en/) to be installed. Web
 
 Check out the [wiki page](https://github.com/ibalosh/sinhook/wiki) for more details.
 
-## Demo
-
-Sinhook repository is deployed to [heroku](https://www.heroku.com/). You can play with the app at **https://sinhook.herokuapp.com**.
-Check out the features at the [wiki page](https://github.com/ibalosh/sinhook/wiki). 
-
-For example you could create a webhook test endpoint by running:
-
-``` bash
-curl -X POST https://sinhook.herokuapp.com/hook/generate
-```
-
 ## Notes
 
 The app accepts only valid JSON requests. Make sure that folder where the app is stored is writable for the app.
