@@ -35,13 +35,13 @@ module Hooks
   # Currently only one type of web hook data holders is available - Folder storage - which holds all data
   # for web hooks locally, in folders and files.
   class Data
-    def initialize(hooks_to_store_count, storage_type = :folder)
-      case storage_type
-        when :folder
-        @hook_storage = HookStorage::Folder.new("#{File.dirname(__FILE__)}/hooks", hooks_to_store_count)
+    def initialize(settings)
+      case settings[:hooks_storage]
+      when 'folder'
+        @hook_storage = HookStorage::Folder.new(settings[:hooks_folder_storage_path], settings[:hooks_to_store].to_i)
 
         else
-        @hook_storage = HookStorage::RAM.new(hooks_to_store_count)
+        @hook_storage = HookStorage::RAM.new(settings[:hooks_to_store].to_i)
       end
     end
 

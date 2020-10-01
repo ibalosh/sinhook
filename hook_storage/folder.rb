@@ -7,7 +7,6 @@ module HookStorage
     attr_accessor :root_folder,
                   :filename
 
-    ROOT_FOLDER = 'hooks'.freeze
     FILENAME = 'hook'.freeze
 
     def initialize(folder, hooks_to_store_count)

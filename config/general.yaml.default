@@ -1,9 +1,12 @@
 # settings
 # each can be also passed as Environment variable with same name, but uppercase, like: APP_BASIC_AUTH=true rackup ...
 
-app_basic_auth:     false
-app_username:       admin
-app_password:       admin
+app_basic_auth:         false
+app_username:           admin
+app_password:           admin
 
-hooks_to_store:     50
-hooks_storage:      folder
+hooks_to_store:         50
+hooks_storage:          folder
+
+# in case hooks_storage is folder, you need to specify folder for storage like /home/hooks/
+hooks_folder_storage_path:    hooks

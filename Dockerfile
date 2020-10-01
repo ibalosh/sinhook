@@ -1,21 +1,23 @@
 FROM ruby:2.5
 
 ENV APP_PORT=8080
-ENV APP_USERNAME=admin
-ENV APP_PASSWORD=admin
+
+ENV APP_USERNAME=sinhook
+ENV APP_PASSWORD=sinhook
 ENV APP_BASIC_AUTH=true
 ENV ENCRYPTED_YAML false
+
+ENV HOOKS_TO_STORE=50
+ENV HOOKS_STORAGE=folder
+ENV HOOKS_FOLDER_STORAGE_PATH="/data/"
 ENV RACK_ENV production
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY . .
-COPY config/general.yaml.default config/general.yaml
-RUN gem install sinatra rerun && mkdir -p /usr/src/app
-RUN mkdir hooks
+COPY ./ /app
+RUN gem install sinatra rerun
 RUN bundle install
+RUN mkdir $HOOKS_FOLDER_STORAGE_PATH
 
-VOLUME /usr/src/app/hooks
-
-CMD rackup -p $APP_PORT
+ENTRYPOINT ["sh", "./scripts/launch" ]
 EXPOSE $APP_PORT
