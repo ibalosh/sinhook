@@ -1,31 +1,34 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    coderay (1.1.2)
+    coderay (1.1.3)
     guid (0.1.1)
-    json (2.1.0)
-    method_source (0.9.0)
-    mustermann (1.0.2)
-    pry (0.11.3)
-      coderay (~> 1.1.0)
-      method_source (~> 0.9.0)
-    puma (3.11.4)
-    rack (2.0.5)
-    rack-protection (2.0.3)
+    json (2.3.1)
+    method_source (1.0.0)
+    mustermann (1.1.1)
+      ruby2_keywords (~> 0.0.1)
+    nio4r (2.5.4)
+    pry (0.13.1)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+    puma (5.0.2)
+      nio4r (~> 2.0)
+    rack (2.2.3)
+    rack-protection (2.1.0)
       rack
+    ruby2_keywords (0.0.2)
     secure_yaml (2.0.2)
-    sinatra (2.0.3)
+    sinatra (2.1.0)
       mustermann (~> 1.0)
-      rack (~> 2.0)
-      rack-protection (= 2.0.3)
+      rack (~> 2.2)
+      rack-protection (= 2.1.0)
       tilt (~> 2.0)
-    tilt (2.0.8)
+    tilt (2.0.10)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (= 1.13.1)
   guid
   json
   pry
@@ -34,4 +37,4 @@ DEPENDENCIES
   sinatra
 
 BUNDLED WITH
-   1.14.1
+   1.17.3
