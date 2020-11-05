@@ -82,7 +82,9 @@ module HookStorage
 
     def remove_hooks(hook_id, index_after)
       files = hook_folder_files(hook_id)
-      (index_after..files.size - 1).each { |i| File.delete files[i] }
+      return if files.size < hooks_to_store_count
+      
+      (index_after..files.size - 1).each { |i| FileUtils.rm_rf(files[i]) }
     end
   end
 end
