@@ -69,7 +69,7 @@ module HookStorage
 
     # hook folder files with newest ones at top
     def hook_folder_files(hook_id)
-      Dir["#{hook_folder(hook_id)}/*"].sort_by { |f| File.mtime(f) }.reverse
+      Dir["#{hook_folder(hook_id)}/*"].sort_by { |f| File.mtime(f) if File.exist?(f) }.reverse
     end
 
     def remove_old_hooks(hook_id_folder)
@@ -83,7 +83,7 @@ module HookStorage
     def remove_hooks(hook_id, index_after)
       files = hook_folder_files(hook_id)
       return if files.size < hooks_to_store_count
-      
+
       (index_after..files.size - 1).each { |i| FileUtils.rm_rf(files[i]) }
     end
   end
