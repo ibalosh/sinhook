@@ -4,9 +4,9 @@
 # the maximum value specified for Puma. Default is set to 5 threads for minimum
 # and maximum, this matches the default thread size of Active Record.
 #
-threads_count = ENV.fetch("SINATRA_MAX_THREADS") { 10 }.to_i
-threads 2, threads_count
-workers ENV.fetch("SINATRA_WORKERS") { 2 }.to_i
+threads_count = ENV.fetch("SINATRA_MAX_THREADS") { 7 }.to_i
+threads 0, threads_count
+workers ENV.fetch("SINATRA_WORKERS") { 1 }.to_i
 
 # Specifies the `environment` that Puma will run in.
 #
