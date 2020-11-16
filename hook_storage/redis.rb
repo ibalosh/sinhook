@@ -30,7 +30,7 @@ module HookStorage
     def set_data(hook_id, hook_data)
       hooks = parsed_hooks(hook_id)
       hooks.shift if hooks.length >= hooks_to_store_count
-      hooks << hook_data
+      hooks << hook_data.force_encoding('utf-8')
       redis.set(hook_id, hooks.to_json)
     end
 
