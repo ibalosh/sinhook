@@ -16,6 +16,7 @@ GEM
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
+    redis (4.2.2)
     ruby2_keywords (0.0.2)
     secure_yaml (2.0.2)
     sinatra (2.1.0)
@@ -33,6 +34,7 @@ DEPENDENCIES
   json
   pry
   puma
+  redis
   secure_yaml
   sinatra
 

@@ -8,5 +8,8 @@ app_password:           admin
 hooks_to_store:         50
 hooks_storage:          folder
 
+# redis details
+hooks_redis_host:       localhost
+
 # in case hooks_storage is folder, you need to specify folder for storage like /home/hooks/
 hooks_folder_storage_path:    hooks

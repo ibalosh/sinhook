@@ -1,6 +1,7 @@
 # encoding: utf-8
 require_relative 'hook_storage/folder'
 require_relative 'hook_storage/ram'
+require_relative 'hook_storage/redis'
 require 'sinatra'
 
 module Hooks
@@ -39,8 +40,10 @@ module Hooks
       case settings[:hooks_storage]
       when 'folder'
         @hook_storage = HookStorage::Folder.new(settings[:hooks_folder_storage_path], settings[:hooks_to_store].to_i)
+      when 'redis'
+        @hook_storage = HookStorage::Redis.new(settings[:hooks_redis_host], 6379, settings[:hooks_to_store].to_i)
 
-        else
+      else
         @hook_storage = HookStorage::RAM.new(settings[:hooks_to_store].to_i)
       end
     end
