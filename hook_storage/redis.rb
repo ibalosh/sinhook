@@ -39,7 +39,7 @@ module HookStorage
     end
 
     def clear_data(hook_id)
-      redis.set(hook_id, {})
+      redis.set(hook_id, [])
     end
 
     def endpoints
