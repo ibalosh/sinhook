@@ -200,6 +200,10 @@ class SinHook < Sinatra::Base
     "User-agent: *\nDisallow: /"
   end
 
+  get '/' do
+    'Sinhook says hello.'
+  end
+
   # GENERAL ENDPOINTS:
   not_found do
     halt 404, response_message('End point not found.')
