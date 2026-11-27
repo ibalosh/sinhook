@@ -1,4 +1,4 @@
-require 'guid'
+require 'securerandom'
 require_relative 'base'
 
 module HookStorage

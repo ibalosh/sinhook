@@ -1,4 +1,4 @@
-require 'guid'
+require 'securerandom'
 
 # Interface for storing web hooks.
 # These are base methods for managing and reading web hook entities.
@@ -37,7 +37,7 @@ module HookStorage
     protected
 
     def generate_id
-      Guid.new.to_s
+      SecureRandom.uuid
     end
   end
 end

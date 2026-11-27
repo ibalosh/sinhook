@@ -1,4 +1,4 @@
-FROM ruby:3.0.0
+FROM ruby:3.3.14
 
 ENV APP_PORT=8080
 
@@ -19,7 +19,6 @@ RUN apt-get purge openssh-client -y
 WORKDIR /app
 
 COPY ./ /app
-RUN gem install sinatra rerun
 RUN bundle install
 RUN mkdir $HOOKS_FOLDER_STORAGE_PATH
 
