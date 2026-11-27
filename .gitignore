@@ -4,4 +4,6 @@ hooks
 **/*.DS_Store
 **/*.idea
 config/general.yaml
+hooks
+data
 

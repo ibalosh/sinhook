@@ -1,0 +1,23 @@
+version: 2.1
+
+jobs:
+  publish-containers:
+    docker:
+      - image: 602216863712.dkr.ecr.us-east-2.amazonaws.com/deploy-tools:2022-06-16-alpine
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: /scripts/container-build/clean
+      - run: /scripts/container-build/build-container . qa-sinhook $(/scripts/container-build/get-tag)
+      - run: /scripts/container-build/publish
+workflows:
+  version: 2
+  continuous-delivery:
+    jobs:
+      - publish-containers:
+          context: dotnet-deploy
+          filters:
+            tags:
+              only:
+                /.*/

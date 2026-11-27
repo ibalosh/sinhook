@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+  sinhook:
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./hooks:/hooks
+    environment:
+     - APP_BASIC_AUTH=false
+     - ENCRYPTED_YAML=false
+     - HOOKS_TO_STORE=50
+     - HOOKS_STORAGE=folder

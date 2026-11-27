@@ -5,3 +5,4 @@ hooks
 **/*.idea
 .git
 Dockerfile
+data

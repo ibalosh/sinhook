@@ -1,4 +1,4 @@
-FROM ruby:2.5
+FROM ruby:3.3.14
 
 ENV APP_PORT=8080
 
@@ -13,10 +13,12 @@ ENV HOOKS_REDIS_HOST=localhost
 ENV HOOKS_FOLDER_STORAGE_PATH="/data/"
 ENV RACK_ENV production
 
+# remove ssh client since we don't need it
+RUN apt-get purge openssh-client -y
+
 WORKDIR /app
 
 COPY ./ /app
-RUN gem install sinatra rerun
 RUN bundle install
 RUN mkdir $HOOKS_FOLDER_STORAGE_PATH
 
